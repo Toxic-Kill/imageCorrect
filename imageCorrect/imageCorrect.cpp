@@ -41,7 +41,7 @@ int main()
 	double length = sqrt((width*0.5 - x1)*(width*0.5 - x1) + (height*0.5)*(height*0.5));
 	double scale = ((sqrt(width*width + height * height))*0.5) / length;
 	//计算出旋转角度
-	double angle = (atan(x1 / y1))*180/3.14159;
+	double angle = (atan2(x1 , y1))*180/3.14159;
 	//旋转中心为图像中心
 	cv::Point2f center(srcMat.cols*0.5, srcMat.rows*0.5);
 	//获得变换矩阵
