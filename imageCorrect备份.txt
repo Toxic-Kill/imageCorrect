@@ -1,0 +1,152 @@
+	int width = srcMat.cols;
+	int height = srcMat.rows;
+	//变换前三点坐标
+	cv::Point2f src_pt[3];
+	//变换后三点坐标
+	cv::Point2f dst_pt[] = {
+							cv::Point2f(0,0),
+							cv::Point2f(0,width - 1),
+							cv::Point2f(height - 1,width - 1)};
+	//第一次遍历
+	for (int j = 0; j < width; j++)
+	{
+		if (srcMat.at<Vec3b>(0,j)[0] + srcMat.at<Vec3b>(0,j)[1] + srcMat.at<Vec3b>(0,j)[2] < 600)
+		{
+			src_pt[0] = cv::Point2f(0, j);
+			break;
+		}
+	}
+	//第二次遍历
+	for (int i = 0; i < height; i++)
+	{
+		if (srcMat.at<Vec3b>(i, width - 1)[0] + srcMat.at<Vec3b>(i, width - 1)[1] + srcMat.at<Vec3b>(i, width - 1)[2] < 600)
+		{
+			src_pt[1] = cv::Point2f(i, width - 1);
+			break;
+		}
+	}
+	//第三次遍历
+	for (int j = width - 1; j >= 0; j--)
+	{
+		if (srcMat.at<Vec3b>(height - 1, j)[0] + srcMat.at<Vec3b>(height - 1, j)[1] + srcMat.at<Vec3b>(height - 1, j)[2] < 600)
+		{
+			src_pt[2] = cv::Point2f(height - 1, j);
+			break;
+		}
+	}
+
+	//计算仿射矩阵
+	const cv::Mat affine_matrix = cv::getAffineTransform(src_pt, dst_pt);
+	//进行图像矫正
+	cv::warpAffine(srcMat, dstMat, affine_matrix, srcMat.size());
+	cv::imshow("src", srcMat);//显示原图像
+	cv::imshow("dst", dstMat);//显示矫正后图像
+	waitKey(0);
+
+
+
+
+
+
+
+
+
+
+
+
+	int width = srcMat.cols;
+	int height = srcMat.rows;
+	//变换前四点坐标
+	cv::Point2f src_pt[4];
+	//变换后四点坐标
+	cv::Point2f dst_pt[] = {
+							cv::Point2f(0,0),
+							cv::Point2f(0,width - 1),
+							cv::Point2f(-height + 1,width - 1),
+							cv::Point2f(-height + 1,0) };
+	//第一次遍历
+	for (int j = 0; j < width; j++)
+	{
+		if (srcMat.at<Vec3b>(0,j)[0] + srcMat.at<Vec3b>(0,j)[1] + srcMat.at<Vec3b>(0,j)[2] < 600)
+		{
+			src_pt[0] = cv::Point2f(0, j);
+			break;
+		}
+	}
+	//第二次遍历
+	for (int i = 0; i < height; i++)
+	{
+		if (srcMat.at<Vec3b>(i, width - 1)[0] + srcMat.at<Vec3b>(i, width - 1)[1] + srcMat.at<Vec3b>(i, width - 1)[2] < 600)
+		{
+			src_pt[1] = cv::Point2f(i, width - 1);
+			break;
+		}
+	}
+	//第三次遍历
+	for (int j = width - 1; j >= 0; j--)
+	{
+		if (srcMat.at<Vec3b>(height - 1, j)[0] + srcMat.at<Vec3b>(height - 1, j)[1] + srcMat.at<Vec3b>(height - 1, j)[2] < 600)
+		{
+			src_pt[2] = cv::Point2f(height - 1, j);
+			break;
+		}
+	}
+	//第四次遍历
+	for (int i = height - 1; i >= 0; i--)
+	{
+		if (srcMat.at<Vec3b>(i, 0)[0] + srcMat.at<Vec3b>(i, 0)[1] + srcMat.at<Vec3b>(i, 0)[2] < 600)
+		{
+			src_pt[3] = cv::Point2f(i, 0);
+			break;
+		}
+	}
+	//计算仿射矩阵
+	const cv::Mat perspective_matrix = cv::getPerspectiveTransform(src_pt, dst_pt);
+	//进行图像矫正
+	cv::warpPerspective(srcMat, dstMat, perspective_matrix, srcMat.size());
+	cv::imshow("src", srcMat);//显示原图像
+	cv::imshow("dst", dstMat);//显示矫正后图像
+	waitKey(0);
+
+
+
+
+
+
+
+int width = srcMat.cols;
+	int height = srcMat.rows;
+	cv::threshold(srcMat, binMat, 250, 255, THRESH_BINARY);//进行二值化
+	int x1,y1;
+	//第一次遍历寻找顶点
+	for (int j = 0; j < width; j++)
+	{
+		if (binMat.at<Vec3b>(0, j)[0] == 0)
+		{
+			x1 = j;
+			break;
+		}
+	}
+	//第二次遍历寻找顶点
+	for (int i = 0; i < height; i++)
+	{
+		if (binMat.at<Vec3b>(i, 0)[0] == 0)
+		{
+			y1 = i;
+			break;
+		}
+	}
+	//计算出缩放尺寸
+	double length = sqrt((width*0.5 - x1)*(width*0.5 - x1) + (height*0.5)*(height*0.5));
+	double scale = ((sqrt(width*width + height * height))*0.5) / length;
+	//计算出旋转角度
+	double angle = atan(x1/y1);
+	//旋转中心为图像中心
+	cv::Point2f center(srcMat.cols*0.5, srcMat.rows*0.5);
+	//获得变换矩阵
+	const cv::Mat affine_matrix = cv::getRotationMatrix2D(center, angle, scale);
+	//进行矫正
+	cv::warpAffine(srcMat, dstMat, affine_matrix, srcMat.size());
+	cv::imshow("src", srcMat);//显示原图像
+	cv::imshow("dst", dstMat);//显示矫正后图像
+	waitKey(0);

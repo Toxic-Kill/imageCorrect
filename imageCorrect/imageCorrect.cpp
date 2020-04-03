@@ -18,22 +18,22 @@ int main()
 	int width = srcMat.cols;
 	int height = srcMat.rows;
 	cv::threshold(srcMat, binMat, 250, 255, THRESH_BINARY);//进行二值化
-	int x1,y1;
+	int x1, y1;
 	//第一次遍历寻找顶点
 	for (int j = 0; j < width; j++)
 	{
-		if (binMat.at<Vec3b>(0, j)[0] = 0)
+		if (binMat.at<Vec3b>(0, j)[0] == 0)
 		{
 			x1 = j;
 			break;
 		}
 	}
 	//第二次遍历寻找顶点
-	for (int i = -height + 1; i <= 0; i++)
+	for (int i = 0; i < height; i++)
 	{
-		if (binMat.at<Vec3b>(i, 0)[0] = 0)
+		if (binMat.at<Vec3b>(i, 0)[0] == 0)
 		{
-			y1 = -i;
+			y1 = i;
 			break;
 		}
 	}
@@ -41,7 +41,7 @@ int main()
 	double length = sqrt((width*0.5 - x1)*(width*0.5 - x1) + (height*0.5)*(height*0.5));
 	double scale = ((sqrt(width*width + height * height))*0.5) / length;
 	//计算出旋转角度
-	double angle = atan(x1/y1);
+	double angle = (atan(x1 / y1))*180/3.14159;
 	//旋转中心为图像中心
 	cv::Point2f center(srcMat.cols*0.5, srcMat.rows*0.5);
 	//获得变换矩阵
