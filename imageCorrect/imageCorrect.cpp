@@ -1,20 +1,54 @@
-﻿// imageCorrect.cpp : 此文件包含 "main" 函数。程序执行将在此处开始并结束。
-//
+﻿#include <iostream>
+#include<opencv2/opencv.hpp>
+#include<math.h>
 
-#include <iostream>
+using namespace std;
+using namespace cv;
 
 int main()
 {
-    std::cout << "Hello World!\n";
+	cv::Mat dstMat;
+	cv::Mat binMat;
+	cv::Mat srcMat = cv::imread("D:\\Files\\lena_rot.jpg");//读取图像
+	//检测图像是否读取成功
+	if (srcMat.empty())
+	{
+		return -1;
+	}
+	int width = srcMat.cols;
+	int height = srcMat.rows;
+	cv::threshold(srcMat, binMat, 250, 255, THRESH_BINARY);//进行二值化
+	int x1,y1;
+	//第一次遍历寻找顶点
+	for (int j = 0; j < width; j++)
+	{
+		if (binMat.at<Vec3b>(0, j)[0] = 0)
+		{
+			x1 = j;
+			break;
+		}
+	}
+	//第二次遍历寻找顶点
+	for (int i = -height + 1; i <= 0; i++)
+	{
+		if (binMat.at<Vec3b>(i, 0)[0] = 0)
+		{
+			y1 = -i;
+			break;
+		}
+	}
+	//计算出缩放尺寸
+	double length = sqrt((width*0.5 - x1)*(width*0.5 - x1) + (height*0.5)*(height*0.5));
+	double scale = ((sqrt(width*width + height * height))*0.5) / length;
+	//计算出旋转角度
+	double angle = atan(x1/y1);
+	//旋转中心为图像中心
+	cv::Point2f center(srcMat.cols*0.5, srcMat.rows*0.5);
+	//获得变换矩阵
+	const cv::Mat affine_matrix = cv::getRotationMatrix2D(center, angle, scale);
+	//进行矫正
+	cv::warpAffine(srcMat, dstMat, affine_matrix, srcMat.size());
+	cv::imshow("src", srcMat);//显示原图像
+	cv::imshow("dst", dstMat);//显示矫正后图像
+	waitKey(0);
 }
-
-// 运行程序: Ctrl + F5 或调试 >“开始执行(不调试)”菜单
-// 调试程序: F5 或调试 >“开始调试”菜单
-
-// 入门使用技巧: 
-//   1. 使用解决方案资源管理器窗口添加/管理文件
-//   2. 使用团队资源管理器窗口连接到源代码管理
-//   3. 使用输出窗口查看生成输出和其他消息
-//   4. 使用错误列表窗口查看错误
-//   5. 转到“项目”>“添加新项”以创建新的代码文件，或转到“项目”>“添加现有项”以将现有代码文件添加到项目
-//   6. 将来，若要再次打开此项目，请转到“文件”>“打开”>“项目”并选择 .sln 文件
